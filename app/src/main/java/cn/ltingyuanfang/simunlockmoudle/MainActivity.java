@@ -15,6 +15,7 @@
  */
 package cn.ltingyuanfang.simunlockmoudle;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -79,16 +80,24 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initThemeColors();
-        setupSystemBars();
+
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
         setContentView(buildContentView());
+        setupSystemBars();
 
         XposedServiceHelper.registerListener(new XposedServiceHelper.OnServiceListener() {
             @Override
             public void onServiceBind(@NonNull XposedService service) {
                 xposedService = service;
                 runOnUiThread(() -> {
-                    updateFrameworkStatus(true);
-                    refreshSlotBadges();
+                    if (!isFinishing() && !isDestroyed()) {
+                        updateFrameworkStatus(true);
+                        refreshSlotBadges();
+                    }
                 });
             }
 
@@ -96,7 +105,11 @@ public class MainActivity extends Activity {
             public void onServiceDied(@NonNull XposedService service) {
                 if (xposedService == service) {
                     xposedService = null;
-                    runOnUiThread(() -> updateFrameworkStatus(false));
+                    runOnUiThread(() -> {
+                        if (!isFinishing() && !isDestroyed()) {
+                            updateFrameworkStatus(false);
+                        }
+                    });
                 }
             }
         });
@@ -120,18 +133,28 @@ public class MainActivity extends Activity {
 
     @SuppressWarnings("deprecation")
     private void setupSystemBars() {
-        Window window = getWindow();
-        window.setStatusBarColor(colorBg);
-        window.setNavigationBarColor(colorBg);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsController controller = window.getInsetsController();
-            if (controller != null) {
-                int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-                controller.setSystemBarsAppearance(isDark ? 0 : mask, mask);
+        try {
+            Window window = getWindow();
+            if (window == null) {
+                return;
             }
-        } else if (!isDark) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            window.setStatusBarColor(colorBg);
+            window.setNavigationBarColor(colorBg);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowInsetsController controller = window.getInsetsController();
+                if (controller != null) {
+                    int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                            | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                    controller.setSystemBarsAppearance(isDark ? 0 : mask, mask);
+                }
+            } else if (!isDark) {
+                View decor = window.getDecorView();
+                if (decor != null) {
+                    decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                }
+            }
+        } catch (Throwable ignored) {
+            // 忽略部分定制 ROM 状态栏接口差异
         }
     }
 
@@ -313,20 +336,29 @@ public class MainActivity extends Activity {
     }
 
     private void updateFrameworkStatus(boolean active) {
-        if (active && xposedService != null) {
-            statusDot.setBackground(createCircleDrawable(colorSuccess));
-            statusTitle.setText("模块已激活");
-            statusSubtitle.setText(xposedService.getFrameworkName()
-                    + " · API " + xposedService.getApiVersion()
-                    + " · 检测到 " + slotRows.size() + " 个卡槽");
-            saveButton.setEnabled(true);
-            saveButton.setAlpha(1f);
-        } else {
-            statusDot.setBackground(createCircleDrawable(colorWarning));
-            statusTitle.setText("模块未激活");
-            statusSubtitle.setText("请在 LSPosed 管理器中启用本模块并勾选「系统界面」");
-            saveButton.setEnabled(false);
-            saveButton.setAlpha(0.55f);
+        try {
+            if (active && xposedService != null) {
+                statusDot.setBackground(createCircleDrawable(colorSuccess));
+                statusTitle.setText("模块已激活");
+                String info = "API " + xposedService.getApiVersion() + " · 检测到 " + slotRows.size() + " 个卡槽";
+                try {
+                    String fwName = xposedService.getFrameworkName();
+                    if (fwName != null && !fwName.isEmpty()) {
+                        info = fwName + " · " + info;
+                    }
+                } catch (Throwable ignored) {
+                }
+                statusSubtitle.setText(info);
+                saveButton.setEnabled(true);
+                saveButton.setAlpha(1f);
+            } else {
+                statusDot.setBackground(createCircleDrawable(colorWarning));
+                statusTitle.setText("模块未激活");
+                statusSubtitle.setText("请在 LSPosed 管理器中启用本模块并勾选「系统界面」");
+                saveButton.setEnabled(false);
+                saveButton.setAlpha(0.55f);
+            }
+        } catch (Throwable ignored) {
         }
     }
 
@@ -334,14 +366,17 @@ public class MainActivity extends Activity {
         if (xposedService == null) {
             return;
         }
-        SharedPreferences prefs = xposedService.getRemotePreferences("sim_unlock");
-        for (SlotRow row : slotRows) {
-            boolean configured = prefs.contains("pin_enc_slot_" + row.slotIndex)
-                    || (row.slotIndex == 0 && prefs.contains("pin_enc"));
-            row.configured = configured;
-            styleBadge(row.badge, configured);
-            row.clearBtn.setVisibility(configured ? View.VISIBLE : View.GONE);
-            row.input.setHint(configured ? "已加密保护（输入新 PIN 可覆盖）" : "输入 4-8 位 PIN 码（留空跳过）");
+        try {
+            SharedPreferences prefs = xposedService.getRemotePreferences("sim_unlock");
+            for (SlotRow row : slotRows) {
+                boolean configured = prefs.contains("pin_enc_slot_" + row.slotIndex)
+                        || (row.slotIndex == 0 && prefs.contains("pin_enc"));
+                row.configured = configured;
+                styleBadge(row.badge, configured);
+                row.clearBtn.setVisibility(configured ? View.VISIBLE : View.GONE);
+                row.input.setHint(configured ? "已加密保护（输入新 PIN 可覆盖）" : "输入 4-8 位 PIN 码（留空跳过）");
+            }
+        } catch (Throwable ignored) {
         }
     }
 
@@ -361,20 +396,24 @@ public class MainActivity extends Activity {
         if (xposedService == null) {
             return;
         }
-        SharedPreferences prefs = xposedService.getRemotePreferences("sim_unlock");
-        SharedPreferences.Editor editor = prefs.edit().remove("pin_enc_slot_" + slotIndex);
-        if (slotIndex == 0) {
-            editor.remove("pin_enc");
-        }
-        editor.apply();
-        for (SlotRow row : slotRows) {
-            if (row.slotIndex == slotIndex) {
-                row.input.setText("");
-                break;
+        try {
+            SharedPreferences prefs = xposedService.getRemotePreferences("sim_unlock");
+            SharedPreferences.Editor editor = prefs.edit().remove("pin_enc_slot_" + slotIndex);
+            if (slotIndex == 0) {
+                editor.remove("pin_enc");
             }
+            editor.apply();
+            for (SlotRow row : slotRows) {
+                if (row.slotIndex == slotIndex) {
+                    row.input.setText("");
+                    break;
+                }
+            }
+            refreshSlotBadges();
+            Toast.makeText(this, "已清除 SIM " + (slotIndex + 1) + " 配置", Toast.LENGTH_SHORT).show();
+        } catch (Throwable t) {
+            Toast.makeText(this, "清除失败", Toast.LENGTH_SHORT).show();
         }
-        refreshSlotBadges();
-        Toast.makeText(this, "已清除 SIM " + (slotIndex + 1) + " 配置", Toast.LENGTH_SHORT).show();
     }
 
     private void savePins() {
@@ -410,20 +449,24 @@ public class MainActivity extends Activity {
             editor.apply();
             refreshSlotBadges();
             Toast.makeText(this, "已加密保存（共更新 " + updatedCount + " 张卡）", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
         }
     }
 
     private int detectSlotCount() {
-        TelephonyManager tm = getSystemService(TelephonyManager.class);
-        if (tm == null) {
+        try {
+            TelephonyManager tm = getSystemService(TelephonyManager.class);
+            if (tm == null) {
+                return 1;
+            }
+            int count = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? tm.getActiveModemCount()
+                    : tm.getPhoneCount();
+            return Math.max(1, count);
+        } catch (Throwable ignored) {
             return 1;
         }
-        int count = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                ? tm.getActiveModemCount()
-                : tm.getPhoneCount();
-        return Math.max(1, count);
     }
 
     private LinearLayout createCardLayout() {
