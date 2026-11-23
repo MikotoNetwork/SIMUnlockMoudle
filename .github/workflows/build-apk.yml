@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    # 【新增】在 job 级别定义环境变量，把 secrets 的判断结果存起来
+    # 在 job 级别定义环境变量，把 secrets 的判断结果存起来
     env:
       HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
 
@@ -35,7 +35,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 【修改】使用 env.HAS_KEYSTORE 来判断
       - name: Build Signed Release APK
         if: env.HAS_KEYSTORE == 'true'
         env:
@@ -52,7 +51,6 @@ jobs:
             -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
           rm -f release.keystore
 
-      # 【修改】使用 env.HAS_KEYSTORE 来判断
       - name: Build Debug APK (Fallback without signing secrets)
         if: env.HAS_KEYSTORE == 'false'
         run: ./gradlew assembleDebug
@@ -64,10 +62,13 @@ jobs:
           path: app/build/outputs/apk/**/*.apk
           if-no-files-found: error
 
-      # 【修改】组合条件同样使用 env.HAS_KEYSTORE
+      # ======= 自动推 Releases 的步骤 =======
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v') && env.HAS_KEYSTORE == 'true'
+        # 只要当前是推送 tag (v*)，就触发。不再限制必须有密钥
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
-          files: app/build/outputs/apk/release/*.apk
+          # 使用通配符，无论产物是 debug 还是 release 都能被抓取到
+          files: app/build/outputs/apk/**/*.apk
           generate_release_notes: true
+          # draft: false # 如果需要先存为草稿，取消这行注释
