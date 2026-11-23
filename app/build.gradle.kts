@@ -125,7 +125,10 @@ tasks.withType<JavaCompile> {
  
 
 dependencies {
+    // LSPosed API核心包必须仅打包时提供！
     compileOnly("io.github.libxposed:api:102.0.0")
+    // LSPosed 对应的服务包，用于热重载
+    implementation("io.github.libxposed:service:102.0.0")
     implementation(libs.androidx.startup.runtime)
     implementation(libs.androidx.interpolator)
     implementation(libs.android.material)
