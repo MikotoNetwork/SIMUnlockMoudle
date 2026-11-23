@@ -1,0 +1,8 @@
+SIMUnlockMoudle Copyright 2026 MikotoNetwork
+
+This product includes software developed by MikotoNetwork (https://github.com/MikotoNetwork/SIMUnlockMoudle).
+
+This project depends on the following third-party open-source libraries, each licensed under the Apache License, Version 2.0:
+
+libxposed API (https://github.com/libxposed/api)
+libxposed Service (https://github.com/libxposed/service)
