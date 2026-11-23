@@ -3,7 +3,6 @@ package cn.ltingyuanfang.simunlockmoudle.core;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.telephony.PinResult;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -78,9 +77,13 @@ public class SimUnlockModule extends XposedModule {
                 if (tm == null) {
                     return;
                 }
-                PinResult res = tm.createForSubscriptionId(subId).supplyIccLockPin(pin);
+                // supplyIccLockPin 与 PinResult 为 @SystemApi，通过反射调用以兼容标准 Android SDK 编译
+                TelephonyManager subTm = tm.createForSubscriptionId(subId);
+                Method supplyPin = TelephonyManager.class.getMethod("supplyIccLockPin", String.class);
+                Object pinResult = getInvoker(supplyPin).invoke(subTm, pin);
+                int resultType = (int) pinResult.getClass().getMethod("getResult").invoke(pinResult);
                 // 仅记录解锁状态码，严禁在日志中输出 PIN 或密文
-                log(Log.INFO, TAG, "SIM unlock attempted, resultType=" + res.getResult());
+                log(Log.INFO, TAG, "SIM unlock attempted, resultType=" + resultType);
             } catch (Throwable t) {
                 log(Log.ERROR, TAG, "SIM unlock error");
             }
