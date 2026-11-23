@@ -1,21 +1,8 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# 忽略 libxposed 编译期注解与框架接口警告
+-dontwarn io.github.libxposed.**
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# 保留本模块全部类、字段与方法（含 XposedModule 入口）
+-keep class cn.ltingyuanfang.simunlockmoudle.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# 保留 libxposed API 与 Service（含 XposedProvider、AIDL 与 Parcelable）
+-keep class io.github.libxposed.** { *; }
