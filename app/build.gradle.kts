@@ -27,7 +27,7 @@ val hasValidSigningProps = keystorePropsFile.exists().also { exists ->
 
 android {
     namespace = "cn.ltingyuanfang.simunlockmoudle"
-    compileSdk = 36 
+    compileSdk = 37
     
     // disable linter
     lint {
@@ -38,7 +38,7 @@ android {
     defaultConfig {
         applicationId = "cn.ltingyuanfang.simunlockmoudle"
         minSdk = 33 
-        targetSdk = 36  
+        targetSdk = 37  
         versionCode = 1
         versionName = "1.0"
         
