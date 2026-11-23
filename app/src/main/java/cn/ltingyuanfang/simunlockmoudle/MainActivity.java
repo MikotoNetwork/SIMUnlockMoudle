@@ -19,6 +19,8 @@ import java.util.List;
 import io.github.libxposed.service.XposedService;
 import io.github.libxposed.service.XposedServiceHelper;
 import android.content.Context;
+import cn.ltingyuanfang.simunlockmoudle.core.PinCrypto;
+
 
 /**
  * 模块配置界面：根据设备卡槽数量自动显示单卡/双卡 PIN 输入框，分别加密写入 RemotePreferences
