@@ -1,3 +1,4 @@
+
 package cn.ltingyuanfang.simunlockmoudle.core;
 
 import android.os.Build;
@@ -16,7 +17,6 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * 基于设备硬件特征 + PBKDF2WithHmacSHA256 派生 AES-256-GCM 密钥的加解密工具
  * 密文格式：Base64(salt[16] + iv[12] + ciphertext)
- * @author 猫薄荷与风
  */
 public final class PinCrypto {
 
@@ -28,8 +28,8 @@ public final class PinCrypto {
     private static final int KEY_BITS = 256;
     private static final int ITERATIONS = 100_000;
 
-    // 建议替换为自行生成的随机应用盐，与设备硬件特征共同参与派生
-    private static final String APP_PEPPER = "abcdefghijklmnopqrstuvwxyz123456789987654321%+-#";
+    // 应用固定 UUID 盐值，与设备硬件特征共同参与派生
+    private static final String APP_PEPPER = "c8e4b912-6f3a-4d7e-9a1b-5c2d8e4f7031";
 
     private PinCrypto() {}
 
