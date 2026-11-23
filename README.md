@@ -1,9 +1,9 @@
 # SIM Auto Unlock
 
-[Build APK](https://www.google.com/search?q=https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml)
+[Build APK](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml)
 
 
-[License](https://www.google.com/search?q=LICENSE)
+[License](https://www.apache.org/licenses/LICENSE-2.0)
 
 基于 [libxposed API 102](https://libxposed.github.io/api/io/github/libxposed/api/package-summary.html) 开发的轻量级 Android SIM 卡自动解锁模块，使用纯 Java 编写，支持单卡与双卡独立配置。
 
@@ -97,4 +97,4 @@ dependencies {
 
 ## 开源协议
 
-本项目基于 [Apache License 2.0](https://www.google.com/search?q=LICENSE) 开源，归属声明见 [NOTICE](https://www.google.com/search?q=NOTICE)。
+本项目基于 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) 开源，归属声明见 [NOTICE](https://www.google.com/search?q=NOTICE)。
