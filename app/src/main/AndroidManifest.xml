@@ -11,13 +11,24 @@
         android:supportsRtl="false" 
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    android:name=".MainActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+    </intent-filter>
+</activity>
+
+<activity-alias
+    android:name=".MainActivityAlias"
+    android:enabled="true"
+    android:exported="true"
+    android:targetActivity=".MainActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity-alias>
 
         
     </application>

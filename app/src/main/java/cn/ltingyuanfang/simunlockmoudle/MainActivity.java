@@ -17,7 +17,9 @@ package cn.ltingyuanfang.simunlockmoudle;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -37,6 +39,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,9 +53,12 @@ import io.github.libxposed.service.XposedService;
 import io.github.libxposed.service.XposedServiceHelper;
 
 /**
- * 模块配置主界面（自适应深浅色模式、单双卡独立卡片、状态实时反馈）
+ * 模块配置主界面（自适应深浅色模式、单双卡独立卡片、支持隐藏/恢复桌面图标）
  */
 public class MainActivity extends Activity {
+
+    private static final String LAUNCHER_ALIAS_CLASS =
+            "cn.ltingyuanfang.simunlockmoudle.MainActivityAlias";
 
     private XposedService xposedService;
     private final List<SlotRow> slotRows = new ArrayList<>();
@@ -154,7 +160,6 @@ public class MainActivity extends Activity {
                 }
             }
         } catch (Throwable ignored) {
-            // 忽略部分定制 ROM 状态栏接口差异
         }
     }
 
@@ -203,10 +208,14 @@ public class MainActivity extends Activity {
         saveButton.setStateListAnimator(null);
         LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(52));
-        btnLp.topMargin = dp(20);
+        btnLp.topMargin = dp(8);
+        btnLp.bottomMargin = dp(16);
         saveButton.setLayoutParams(btnLp);
         saveButton.setOnClickListener(v -> savePins());
         root.addView(saveButton);
+
+        // 桌面图标显示控制卡片
+        root.addView(buildLauncherIconCard());
 
         // 底部安全提示
         TextView footer = new TextView(this);
@@ -214,7 +223,7 @@ public class MainActivity extends Activity {
         footer.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         footer.setLineSpacing(dp(4), 1f);
         footer.setTextColor(colorTextSecondary);
-        footer.setPadding(dp(4), dp(16), dp(4), 0);
+        footer.setPadding(dp(4), dp(8), dp(4), 0);
         root.addView(footer);
 
         scrollView.addView(root);
@@ -256,7 +265,6 @@ public class MainActivity extends Activity {
         LinearLayout card = createCardLayout();
         card.setOrientation(LinearLayout.VERTICAL);
 
-        // 标题行：SIM X + 状态徽章 + 清除按钮
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(Gravity.CENTER_VERTICAL);
@@ -292,7 +300,6 @@ public class MainActivity extends Activity {
 
         card.addView(header);
 
-        // 输入框容器（含显示/隐藏切换）
         LinearLayout inputBox = new LinearLayout(this);
         inputBox.setOrientation(LinearLayout.HORIZONTAL);
         inputBox.setGravity(Gravity.CENTER_VERTICAL);
@@ -333,6 +340,69 @@ public class MainActivity extends Activity {
         slotRows.add(new SlotRow(slotIndex, input, badge, clearBtn));
         styleBadge(badge, false);
         return card;
+    }
+
+    private View buildLauncherIconCard() {
+        LinearLayout card = createCardLayout();
+        card.setOrientation(LinearLayout.HORIZONTAL);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+
+        LinearLayout textBox = new LinearLayout(this);
+        textBox.setOrientation(LinearLayout.VERTICAL);
+
+        TextView title = new TextView(this);
+        title.setText("隐藏桌面图标");
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setTextColor(colorTextPrimary);
+        textBox.addView(title);
+
+        TextView desc = new TextView(this);
+        desc.setText("隐藏后仍可在 LSPosed 管理器中点击模块打开本页");
+        desc.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        desc.setTextColor(colorTextSecondary);
+        desc.setPadding(0, dp(2), dp(12), 0);
+        textBox.addView(desc);
+
+        card.addView(textBox, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        Switch hideSwitch = new Switch(this);
+        hideSwitch.setChecked(isLauncherIconHidden());
+        hideSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!setLauncherIconHidden(isChecked)) {
+                buttonView.setChecked(!isChecked);
+                Toast.makeText(this, "切换失败，请确认 Manifest 已声明 MainActivityAlias", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, isChecked ? "已隐藏桌面图标" : "已恢复桌面图标", Toast.LENGTH_SHORT).show();
+            }
+        });
+        card.addView(hideSwitch);
+
+        return card;
+    }
+
+    private boolean isLauncherIconHidden() {
+        try {
+            ComponentName alias = new ComponentName(this, LAUNCHER_ALIAS_CLASS);
+            int state = getPackageManager().getComponentEnabledSetting(alias);
+            return state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    private boolean setLauncherIconHidden(boolean hidden) {
+        try {
+            ComponentName alias = new ComponentName(this, LAUNCHER_ALIAS_CLASS);
+            int newState = hidden
+                    ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    : PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+            getPackageManager().setComponentEnabledSetting(
+                    alias, newState, PackageManager.DONT_KILL_APP);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 
     private void updateFrameworkStatus(boolean active) {
@@ -429,7 +499,7 @@ public class MainActivity extends Activity {
             for (SlotRow row : slotRows) {
                 String pin = row.input.getText().toString().trim();
                 if (pin.isEmpty()) {
-                    continue; // 留空保持原有配置，删除请点击右侧「清除」
+                    continue;
                 }
                 if (pin.length() < 4 || pin.length() > 8) {
                     Toast.makeText(this, "SIM " + (row.slotIndex + 1) + " PIN 长度应为 4-8 位", Toast.LENGTH_SHORT).show();
