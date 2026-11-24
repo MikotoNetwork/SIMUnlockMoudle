@@ -25,7 +25,7 @@
 
 ## 使用方法
 
-1. 从本仓库 [![release](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml/badge.svg)](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml) 下载并安装模块 APK。
+1. 从本仓库 <a href="https://github.com/MikotoNetwork/SIMUnlockMoudle/releases/latest">release</a>下载并安装模块 APK。
 2. 打开 **LSPosed 管理器 → 模块**，启用本模块并确认作用域已勾选 **系统界面 (`com.android.systemui`)**。
 3. 打开模块主界面，根据提示输入需要自动解锁的卡槽 PIN 码（无需解锁的卡槽留空），点击 **加密保存**。
 4. 重启设备，开机后模块将自动完成 SIM 卡 PIN 解锁。
