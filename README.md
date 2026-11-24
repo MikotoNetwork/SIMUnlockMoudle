@@ -1,12 +1,12 @@
 # SIM Auto Unlock
 
-[Build APK](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml)
+[![release](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml/badge.svg)](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)]()
 
 
-[License](https://www.apache.org/licenses/LICENSE-2.0)
 
-基于 [libxposed API 102](https://libxposed.github.io/api/io/github/libxposed/api/package-summary.html) 开发的轻量级 Android SIM 卡自动解锁模块，使用纯 Java 编写，支持单卡与双卡独立配置。
-
+基于 [![API](https://img.shields.io/badge/API-102-brightgreen)](https://github.com/libxposed/api)
 ## 功能特性
 
 - **开机自动解锁**：注入 `com.android.systemui`，通过系统标准 `SIM_STATE_CHANGED` 广播与开机后卡槽状态兜底检查触发解锁，不依赖特定 ROM 的私有锁屏实现（已验证适配 ColorOS 等定制系统）。
@@ -25,7 +25,7 @@
 
 ## 使用方法
 
-1. 从本仓库 [Releases](https://www.google.com/search?q=https://github.com/MikotoNetwork/SIMUnlockMoudle/releases) 下载并安装模块 APK。
+1. 从本仓库 [![release](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml/badge.svg)](https://github.com/MikotoNetwork/SIMUnlockMoudle/actions/workflows/build-apk.yml) 下载并安装模块 APK。
 2. 打开 **LSPosed 管理器 → 模块**，启用本模块并确认作用域已勾选 **系统界面 (`com.android.systemui`)**。
 3. 打开模块主界面，根据提示输入需要自动解锁的卡槽 PIN 码（无需解锁的卡槽留空），点击 **加密保存**。
 4. 重启设备，开机后模块将自动完成 SIM 卡 PIN 解锁。
@@ -97,4 +97,4 @@ dependencies {
 
 ## 开源协议
 
-本项目基于 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) 开源，归属声明见 [NOTICE](https://www.google.com/search?q=NOTICE)。
+本项目基于 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)开源，归属声明见 [NOTICE](https://github.com/MikotoNetwork/SIMUnlockMoudle/blob/main/NOTICE)。
