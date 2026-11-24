@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SIM卡自动解锁模块</string>
-
+    <string name="app_name">SIM 自动解锁</string>
+    <string name="module_description">基于 libxposed API 102 的单/双卡 SIM PIN 开机自动解锁模块，本地加密存储 By 猫薄荷与风</string>
 </resources>

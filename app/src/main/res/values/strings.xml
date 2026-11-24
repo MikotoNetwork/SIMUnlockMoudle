@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SIMUnlockMoudle</string>
+    <string name="module_description">Auto-unlock single/dual SIM PIN on boot via libxposed API 102, with local encrypted storage. By Catnip &amp; Wind</string>
+
 
 </resources>

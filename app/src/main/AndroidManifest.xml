@@ -8,7 +8,8 @@
         android:icon="@drawable/icon" 
         android:roundIcon="@drawable/icon" 
         android:label="@string/app_name" 
-        android:supportsRtl="false" 
+        android:supportsRtl="false"
+        android:description="@string/module_description"
         android:theme="@style/AppTheme">
         <activity
     android:name=".MainActivity"
@@ -29,10 +30,6 @@
         <category android:name="android.intent.category.LAUNCHER" />
     </intent-filter>
 </activity-alias>
-<meta-data
-  android:name="xposeddescription"
-  android:value="用于每次开机时自动解锁SIM卡 By 猫薄荷与风" />
-
         
     </application>
 </manifest>
