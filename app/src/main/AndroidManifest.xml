@@ -29,6 +29,9 @@
         <category android:name="android.intent.category.LAUNCHER" />
     </intent-filter>
 </activity-alias>
+<meta-data
+  android:name="xposeddescription"
+  android:value="用于每次开机时自动解锁SIM卡 By 猫薄荷与风" />
 
         
     </application>
