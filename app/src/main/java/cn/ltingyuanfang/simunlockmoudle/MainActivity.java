@@ -54,6 +54,8 @@ import io.github.libxposed.service.XposedServiceHelper;
 
 /**
  * 模块配置主界面（自适应深浅色模式、单双卡独立卡片、支持隐藏/恢复桌面图标）
+ * @author 猫薄荷与风
+ * @version 1.0
  */
 public class MainActivity extends Activity {
 

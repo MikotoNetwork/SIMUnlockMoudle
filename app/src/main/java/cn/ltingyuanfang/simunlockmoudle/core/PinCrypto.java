@@ -31,6 +31,12 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * 基于设备硬件特征 + PBKDF2WithHmacSHA256 派生 AES-256-GCM 密钥的加解密工具
  * 密文格式：Base64(salt[16] + iv[12] + ciphertext)
+ * @author 猫薄荷与风
+ * @see javax.crypto.Cipher
+ * @see javax.crypto.SecretKeyFactory
+ * @see javax.crypto.spec.GCMParameterSpec
+ * @see javax.crypto.spec.PBEKeySpec
+ * @see javax.crypto.spec.SecretKeySpec
  */
 public final class PinCrypto {
 
@@ -68,7 +74,8 @@ public final class PinCrypto {
     public static String decrypt(String encoded) throws Exception {
         byte[] combined = Base64.decode(encoded, Base64.NO_WRAP);
         if (combined.length <= SALT_LEN + IV_LEN) {
-            return null;
+            // 返回空字符串，避免空指针
+            return "";
         }
         byte[] salt = new byte[SALT_LEN];
         byte[] iv = new byte[IV_LEN];
@@ -97,6 +104,7 @@ public final class PinCrypto {
 
     /**
      * 选用跨进程一致且不随系统 OTA 变化的硬件特征（避免使用按签名隔离的 ANDROID_ID）
+     * @return 硬件特征的char数组
      */
     private static char[] buildDeviceSeed() {
         String abis = Build.SUPPORTED_ABIS != null ? String.join(",", Build.SUPPORTED_ABIS) : "";
